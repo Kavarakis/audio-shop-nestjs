@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Customer, Track } from '@prisma/client';
 import { PDFDocument } from 'pdf-lib';
-import * as fs from 'fs';
 import fontKit from '@pdf-lib/fontkit';
+import * as fsPromise from 'fs/promises';
 
 import { PrismaService } from '../prisma.service';
 /* 
@@ -16,14 +16,23 @@ export class CustomerService {
   pdf: Uint8Array;
 
   constructor(private readonly prismaService: PrismaService) {
-    this.robotoFont = fs.readFileSync(`${process.cwd()}/Roboto-Regular.ttf`);
+    this.loadFonts();
     // Loading customers from a JSON file instead from the database is by design.
-    this.customerList = JSON.parse(
-      fs.readFileSync(`${process.cwd()}/customers.json`, {
-        encoding: 'utf-8',
-      }),
-    );
+    //  Update: remove sync loading.
+    this.loadCustomerList();
     this.set_pdf();
+  }
+  async loadFonts() {
+    this.robotoFont = await fsPromise.readFile(
+      `${process.cwd()}/Roboto-Regular.ttf`
+    );
+  }
+  async loadCustomerList() {
+    this.customerList = JSON.parse(
+      await fsPromise.readFile(`${process.cwd()}/customers.json`, {
+        encoding: 'utf-8',
+      })
+    );
   }
   async set_pdf() {
     this.pdf = await this.preparePdf();
