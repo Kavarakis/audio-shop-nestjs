@@ -18,7 +18,7 @@ export class CustomerService {
   constructor(private readonly prismaService: PrismaService) {
     this.loadFonts();
     // Loading customers from a JSON file instead from the database is by design.
-    //  Update: remove sync loading.
+    //  Update: remove sync  blocking I/O loading.
     this.loadCustomerList();
     this.set_pdf();
   }
